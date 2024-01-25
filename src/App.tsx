@@ -1,5 +1,10 @@
 import { useState } from 'react';
 import { IMCResult, calculateIMC } from './lib/IMC';
+import Label from './components/Label';
+import Input from './components/Input';
+import Button from './components/Button';
+import IMCTable from './components/IMCTable';
+import IMCResultTable from './components/IMCResultTable';
 
 function App() {
   const [IMCData, setIMCData] = useState<null | {
@@ -63,118 +68,30 @@ function App() {
         <h1 className="text-2xl py-2 text-center">Calculadora IMC</h1>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col">
-            <label htmlFor="weight">Peso</label>
-            <input
-              className="border rounded-md border-solid border-[#E85B81] py-3 pl-6 mb-4"
-              type="number"
-              placeholder="Kg"
-              name="weight"
-            />
+            <Label htmlFor="weight">Peso</Label>
+            <Input className="mb-4" type="number" placeholder="Kg" name="weight" />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="height">Altura</label>
-            <input
-              className="border rounded-md border-solid border-[#E85B81] py-3 pl-6 mb-6"
-              type="number"
-              placeholder="cm"
-              name="height"
-            />
+            <Label htmlFor="height">Altura</Label>
+            <Input className="mb-6" type="number" placeholder="cm" name="height" />
           </div>
           {IMCData ? (
-            <button
-              className="w-full bg-[#E85B81] text-center text-white py-2 my-2 rounded"
-              onClick={handleClickReset}
-              type="button"
-            >
+            <Button onClick={handleClickReset} type="button">
               Refazer
-            </button>
+            </Button>
           ) : (
-            <button
-              className="w-full bg-[#E85B81] text-center text-white py-2 my-2 rounded"
-              type="submit"
-            >
-              Calcular
-            </button>
+            <Button type="submit">Calcular</Button>
           )}
         </form>
 
         <div className="pt-14 pb-12 flex justify-center">
           {IMCData ? (
-            <table className="table-auto">
-              <thead>
-                <tr>
-                  <th className="text-center text-[#E85B81]">Peso</th>
-                  <th className="text-center text-[#E85B81]">Altura</th>
-                  <th className="text-center text-[#E85B81]">IMC</th>
-                  <th className="text-center text-[#E85B81]">Resultado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="py-1">{IMCData.weight}</td>
-                  <td className="py-1">{IMCData.height}</td>
-                  <td className="py-1">{IMCData.IMC}</td>
-                  <td className="py-1">
-                    {IMCData.IMC < 17
-                      ? 'Muito abaixo do peso'
-                      : IMCData.IMC < 18.5
-                      ? 'Abaixo do peso'
-                      : IMCData.IMC < 25
-                      ? 'Peso normal'
-                      : IMCData.IMC < 30
-                      ? 'Acima do peso'
-                      : IMCData.IMC < 35
-                      ? 'Obesidade I'
-                      : IMCData.IMC < 40
-                      ? 'Obesidade II (severa)'
-                      : 'Obesidade III (mórbida)'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <IMCResultTable IMCData={IMCData} />
           ) : (
             <p className="text-center text-[#ABABAB]">Saiba agora se está no seu peso ideal!</p>
           )}
         </div>
-
-        <table className="table-auto text-sm">
-          <thead>
-            <tr>
-              <th className="text-center text-[#E85B81]">IMC</th>
-              <th className="text-center text-[#E85B81]">Classificação</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="py-1">Menos de 17</td>
-              <td className="py-1">Muito abaixo do peso</td>
-            </tr>
-            <tr>
-              <td className="py-1">Entre 17 e 18,49</td>
-              <td className="py-1">Abaixo do peso</td>
-            </tr>
-            <tr>
-              <td className="py-1">Entre 18,5 e 24,99</td>
-              <td className="py-1">Peso normal</td>
-            </tr>
-            <tr>
-              <td className="py-1">Entre 25 e 29,99</td>
-              <td className="py-1">Acima do peso</td>
-            </tr>
-            <tr>
-              <td className="py-1">Entre 30 e 34,99</td>
-              <td className="py-1">Obesidade I</td>
-            </tr>
-            <tr>
-              <td className="py-1">Entre 35 e 39,99</td>
-              <td className="py-1">Obesidade II (severa)</td>
-            </tr>
-            <tr>
-              <td className="py-1">Acima de 40</td>
-              <td className="py-1">Obesidade III (mórbida)</td>
-            </tr>
-          </tbody>
-        </table>
+        <IMCTable />
       </div>
     </div>
   );
