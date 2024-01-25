@@ -1,21 +1,61 @@
 import { useState } from 'react';
+import { IMCResult, calculateIMC } from './lib/IMC';
 
 function App() {
-  const [formData, setFormData] = useState({ peso: '', altura: '' });
-  const [IMC, setIMC] = useState(0);
+  const [IMCData, setIMCData] = useState<null | {
+    weight: number;
+    height: number;
+    IMC: number;
+    IMCResultValue: string;
+  }>(null);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (event: { preventDefault: () => void }) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    IMC === 0
-      ? setIMC(Number(formData.peso) / (Number(formData.altura) / 100) ** 2)
-      : (setIMC(0), setFormData({ peso: '', altura: '' }));
-    console.log(IMC);
+
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData) as { weight: string; height: string };
+
+    const { weight, height } = data;
+    if (!weight || !height) {
+      alert('Ops... você precisa preencher todos os campos');
+      return;
+    }
+
+    const weightValue = parseFloat(weight.replace(',', '.'));
+    const heightValue = parseFloat(height.replace(',', '.')) / 100;
+
+    if (isNaN(weightValue) || isNaN(heightValue)) {
+      alert('Insira um valor válido');
+      return;
+    }
+
+    if (weightValue < 2 || weightValue > 300) {
+      alert('Insira um valor válido de peso');
+      return;
+    }
+
+    if (heightValue < 0.3 || heightValue > 3) {
+      alert('Insira um valor válido de altura');
+      return;
+    }
+
+    const IMC = calculateIMC(weightValue, heightValue);
+    const IMCResultValue = IMCResult(IMC);
+
+    setIMCData({
+      weight: weightValue,
+      height: heightValue,
+      IMC,
+      IMCResultValue,
+    });
+
+    event.currentTarget.reset();
   };
+
+  function handleClickReset(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    setIMCData(null);
+  }
 
   return (
     <div className="px-8 py-12 sm:px-32 md:px-52 lg:px-72 bg-[#c7c7c7] h-fit">
@@ -23,39 +63,43 @@ function App() {
         <h1 className="text-2xl py-2 text-center">Calculadora IMC</h1>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col">
-            <label htmlFor="">Peso</label>
+            <label htmlFor="weight">Peso</label>
             <input
-              required
               className="border rounded-md border-solid border-[#E85B81] py-3 pl-6 mb-4"
               type="number"
               placeholder="Kg"
-              value={formData.peso}
-              onChange={handleChange}
-              name="peso"
+              name="weight"
             />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="">Altura</label>
+            <label htmlFor="height">Altura</label>
             <input
-              required
               className="border rounded-md border-solid border-[#E85B81] py-3 pl-6 mb-6"
               type="number"
               placeholder="cm"
-              value={formData.altura}
-              onChange={handleChange}
-              name="altura"
+              name="height"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-[#E85B81] text-center text-white py-2 my-2 rounded"
-          >
-            {IMC ? 'Refazer' : 'Calcular'}
-          </button>
+          {IMCData ? (
+            <button
+              className="w-full bg-[#E85B81] text-center text-white py-2 my-2 rounded"
+              onClick={handleClickReset}
+              type="button"
+            >
+              Refazer
+            </button>
+          ) : (
+            <button
+              className="w-full bg-[#E85B81] text-center text-white py-2 my-2 rounded"
+              type="submit"
+            >
+              Calcular
+            </button>
+          )}
         </form>
 
         <div className="pt-14 pb-12 flex justify-center">
-          {IMC ? (
+          {IMCData ? (
             <table className="table-auto">
               <thead>
                 <tr>
@@ -67,21 +111,21 @@ function App() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="py-1">{formData.peso}</td>
-                  <td className="py-1">{formData.altura}</td>
-                  <td className="py-1">{IMC.toFixed(2)}</td>
+                  <td className="py-1">{IMCData.weight}</td>
+                  <td className="py-1">{IMCData.height}</td>
+                  <td className="py-1">{IMCData.IMC}</td>
                   <td className="py-1">
-                    {IMC < 17
+                    {IMCData.IMC < 17
                       ? 'Muito abaixo do peso'
-                      : IMC < 18.5
+                      : IMCData.IMC < 18.5
                       ? 'Abaixo do peso'
-                      : IMC < 25
+                      : IMCData.IMC < 25
                       ? 'Peso normal'
-                      : IMC < 30
+                      : IMCData.IMC < 30
                       ? 'Acima do peso'
-                      : IMC < 35
+                      : IMCData.IMC < 35
                       ? 'Obesidade I'
-                      : IMC < 40
+                      : IMCData.IMC < 40
                       ? 'Obesidade II (severa)'
                       : 'Obesidade III (mórbida)'}
                   </td>
